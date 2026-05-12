@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.secret
+.git/
+tests/
+deploy/
+deploy.example/
+.ruff_cache/
+docs/
+samples/
+test_local.py

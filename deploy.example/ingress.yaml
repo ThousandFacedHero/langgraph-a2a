@@ -1,0 +1,25 @@
+# Optional — only needed if you want external access via hostname.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: <AGENT_NAME>
+  namespace: <NAMESPACE>
+  # annotations:
+  #   cert-manager.io/cluster-issuer: <ISSUER_NAME>
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: <AGENT_NAME>.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: <AGENT_NAME>
+                port:
+                  number: <PORT>
+  # tls:
+  #   - hosts:
+  #       - <AGENT_NAME>.example.com
+  #     secretName: <AGENT_NAME>-tls

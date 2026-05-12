@@ -1,0 +1,68 @@
+# Copy this directory to deploy/ and fill in the placeholders.
+# deploy/ is gitignored — your environment-specific values stay local.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <AGENT_NAME>
+  namespace: <NAMESPACE>
+  labels:
+    app: <AGENT_NAME>
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: <AGENT_NAME>
+  template:
+    metadata:
+      labels:
+        app: <AGENT_NAME>
+    spec:
+      containers:
+        - name: agent
+          image: <IMAGE>:<TAG>
+          # imagePullPolicy: Never  # uncomment for local k3s ctr import
+          ports:
+            - containerPort: <PORT>
+              name: a2a
+          envFrom:
+            - configMapRef:
+                name: <AGENT_NAME>-config
+            - secretRef:
+                name: <AGENT_NAME>-secrets
+          # --- Optional: custom CA cert ---
+          # Uncomment if your LLM endpoint uses a private CA:
+          # env:
+          #   - name: SSL_CERT_FILE
+          #     value: /etc/ssl/custom/ca.crt
+          #   - name: REQUESTS_CA_BUNDLE
+          #     value: /etc/ssl/custom/ca.crt
+          # volumeMounts:
+          #   - name: ca-cert
+          #     mountPath: /etc/ssl/custom
+          #     readOnly: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: <PORT>
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: <PORT>
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      # --- Optional: custom CA cert volume ---
+      # volumes:
+      #   - name: ca-cert
+      #     configMap:
+      #       name: <CA_CONFIGMAP_NAME>
